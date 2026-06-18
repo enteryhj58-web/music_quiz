@@ -186,7 +186,7 @@ def get_music_list():
         ],
         [
             "Tchaikovsky Symphony No. 6 ‘Pathetique’, 1st Mvt. (4분 50초부터)",
-            "https://www.youtube.com/watch?v=oEW0cXVoGo0",
+            "https://youtu.be/oEW0cXVoGo0",
             290,
         ],
         [
