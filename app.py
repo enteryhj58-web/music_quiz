@@ -88,9 +88,9 @@ st.title("🎵 서양음악사 블라인드 청음 테스트")
 # 💡 [핵심 추가] 게임 시작 전 브라우저 클릭 권한을 얻기 위한 인트로 화면
 if not st.session_state.started:
     st.write("화면 노출 X! 버튼을 누르면 음악이 즉시 자동으로 흘러나옵니다.")
-    st.info("⚠️ 주의: 스마트폰이나 크롬 브라우저의 무음 정책을 깨기 위해 아래 버튼을 꼭 눌러주세요!")
+    st.info("서양음악사 기말고사 리스닝 문제")
     
-    if st.button("🚀 청음 테스트 시작하기 (첫 곡부터 자동 재생)", use_container_width=True, type="primary"):
+    if st.button("청음 테스트 시작하기", use_container_width=True, type="primary"):
         st.session_state.started = True
         st.rerun()
 
