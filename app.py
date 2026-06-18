@@ -6,9 +6,32 @@ st.set_page_config(
     page_title="서양음악사 청음 테스트", page_icon="🎵", layout="centered"
 )
 
+# 🎨 [핵심 포인트] 유튜브 비디오 화면을 눈에 안 보이게 완전히 숨기는 CSS 마술
+st.markdown(
+    """
+    <style>
+    /* 유튜브 플레이어 박스의 높이를 1px로 만들어 화면을 완전히 숨깁니다 */
+    div[data-testid="stVideo"] iframe {
+        height: 1px !important;
+        opacity: 0.01;
+    }
+    /* 오디오처럼 보이도록 제어 바 공간만 최소한으로 남깁니다 */
+    div[data-testid="stVideo"] {
+        height: 60px !important;
+        overflow: hidden;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        background-color: #f9f9f9;
+        padding: 5px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 
 # =========================================================================
-# 58곡 전곡 데이터 리스트 (기존과 동일)
+# 58곡 전곡 데이터 리스트
 # =========================================================================
 @st.cache_data
 def get_music_list():
@@ -185,7 +208,7 @@ def get_music_list():
         ],
         [
             "Tchaikovsky Symphony No. 6 ‘Pathetique’, 1st Mvt. (4분 50초부터)",
-            "https://www.youtube.com/watch?v=oEW0cXVoGo0",
+            "https://youtu.be/Hk17wO_mOEU",  # 👈 안정적인 유튜버 링크로 교체 완료
             290,
         ],
         [
@@ -323,8 +346,8 @@ if idx < len(pool):
 
     st.subheader(f"📝 문제 {idx + 1} / {len(pool)}")
 
-    # 💡 [핵심 교체 포인트] st.video를 사용하여 시작 시간(start_time)을 유튜브 공식 기능으로 확실하게 제어합니다.
-    st.video(url, start_time=start_sec)
+    # 💡 유튜브 플레이어를 재생하지만 위의 CSS 코드가 화면을 강제로 1px로 짜부라뜨려 소리만 들리게 만듭니다.
+    st.video(url, start_time=int(start_sec))
 
     if start_sec > 0:
         st.info(
