@@ -80,65 +80,77 @@ if "quiz_pool" not in st.session_state:
     st.session_state.quiz_pool = pool
     st.session_state.current_index = 0
     st.session_state.show_answer = False
+    st.session_state.started = False  # 💡 인트로 체크용 상태 변수 추가
 
 # --- UI 그리기 ---
 st.title("🎵 서양음악사 블라인드 청음 테스트")
-st.write("화면 노출 X! 다음 문제로 넘어가면 음악이 자동으로 실행됩니다.")
-st.markdown("---")
 
-pool = st.session_state.quiz_pool
-idx = st.session_state.current_index
-
-if idx < len(pool):
-    title, url, start_sec = pool[idx]
-
-    st.subheader(f"📝 문제 {idx + 1} / {len(pool)}")
-
-    # 💡 [핵심 기술] 유튜브 비디오 ID를 추출하여 눈에 보이지 않는 0px짜리 자동 재생 iframe 생성
-    video_id = url.split("youtu.be/")[1].split("?")[0] if "youtu.be/" in url else url.split("v=")[1].split("&")[0]
+# 💡 [핵심 추가] 게임 시작 전 브라우저 클릭 권한을 얻기 위한 인트로 화면
+if not st.session_state.started:
+    st.write("화면 노출 X! 버튼을 누르면 음악이 즉시 자동으로 흘러나옵니다.")
+    st.info("⚠️ 주의: 스마트폰이나 크롬 브라우저의 무음 정책을 깨기 위해 아래 버튼을 꼭 눌러주세요!")
     
-    # 크롬 브라우저 자동재생 정책(autoplay=1&mute=0)을 주입한 비밀 소스 코드
-    embed_code = f"""
-    <iframe width="0" height="0" 
-        src="https://www.youtube.com/embed/{video_id}?autoplay=1&mute=0&start={int(start_sec)}" 
-        frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-        allowfullscreen>
-    </iframe>
-    """
-    
-    # 화면에는 가림막 안내문만 깔끔하게 노출
-    st.info("🎧 블라인드 자동 재생 중... 소리에 집중해 주세요!")
-    components.html(embed_code, height=0)  # 높이를 0으로 설정해 화면에서 완전히 소멸시킴
+    if st.button("🚀 청음 테스트 시작하기 (첫 곡부터 자동 재생)", use_container_width=True, type="primary"):
+        st.session_state.started = True
+        st.rerun()
 
-    if start_sec > 0:
-        st.caption(
-            f"💡 이 곡은 하이라이트 구간인 **{start_sec//60}분 {start_sec%60}초** 지점부터 자동 재생 중입니다."
-        )
-
-    st.write("")
-
-    # 정답 확인 버튼
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("👁️ 정답 확인하기", use_container_width=True):
-            st.session_state.show_answer = True
-
-    # 정답 표시
-    if st.session_state.show_answer:
-        st.success(f"📢 정답은 바로: **{title}** 입니다!")
-
+# 게임 시작 후 화면
+else:
+    st.write("화면 노출 X! 다음 문제로 넘어가면 음악이 자동으로 실행됩니다.")
     st.markdown("---")
 
-    # 다음 문제 버튼
-    with col2:
-        if st.button("➡️ 다음 문제로 넘어가기", use_container_width=True):
-            st.session_state.current_index += 1
-            st.session_state.show_answer = False
-            st.rerun()
+    pool = st.session_state.quiz_pool
+    idx = st.session_state.current_index
 
-else:
-    st.balloons()
-    st.success("🎉 축하합니다! 58곡의 모든 문제를 다 풀었습니다. 기말고사 만점 가자! 💯")
-    if st.button("🔄 처음부터 다시 풀기"):
-        del st.session_state.quiz_pool
-        st.rerun()
+    if idx < len(pool):
+        title, url, start_sec = pool[idx]
+
+        st.subheader(f"📝 문제 {idx + 1} / {len(pool)}")
+
+        # 유튜브 비디오 ID를 추출하여 눈에 보이지 않는 0px짜리 자동 재생 iframe 생성
+        video_id = url.split("youtu.be/")[1].split("?")[0] if "youtu.be/" in url else url.split("v=")[1].split("&")[0]
+        
+        embed_code = f"""
+        <iframe width="0" height="0" 
+            src="https://www.youtube.com/embed/{video_id}?autoplay=1&mute=0&start={int(start_sec)}" 
+            frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen>
+        </iframe>
+        """
+        
+        st.info("🎧 블라인드 자동 재생 중... 소리에 집중해 주세요!")
+        components.html(embed_code, height=0)  # 화면 소멸
+
+        if start_sec > 0:
+            st.caption(
+                f"💡 이 곡은 하이라이트 구간인 **{start_sec//60}분 {start_sec%60}초** 지점부터 자동 재생 중입니다."
+            )
+
+        st.write("")
+
+        # 정답 확인 버튼
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("👁️ 정답 확인하기", use_container_width=True):
+                st.session_state.show_answer = True
+
+        # 정답 표시
+        if st.session_state.show_answer:
+            st.success(f"📢 정답은 바로: **{title}** 입니다!")
+
+        st.markdown("---")
+
+        # 다음 문제 버튼
+        with col2:
+            if st.button("➡️ 다음 문제로 넘어가기", use_container_width=True):
+                st.session_state.current_index += 1
+                st.session_state.show_answer = False
+                st.rerun()
+
+    else:
+        st.balloons()
+        st.success("🎉 축하합니다! 58곡의 모든 문제를 다 풀었습니다. 기말고사 만점 가자! 💯")
+        if st.button("🔄 처음부터 다시 풀기"):
+            del st.session_state.quiz_pool
+            st.session_state.started = False
+            st.rerun()
