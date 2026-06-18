@@ -1,6 +1,5 @@
 import random
 import streamlit as st
-import yt_dlp
 
 # 웹페이지 기본 설정
 st.set_page_config(
@@ -9,7 +8,7 @@ st.set_page_config(
 
 
 # =========================================================================
-# 58곡 전곡 데이터 리스트
+# 58곡 전곡 데이터 리스트 (기존과 동일)
 # =========================================================================
 @st.cache_data
 def get_music_list():
@@ -186,7 +185,7 @@ def get_music_list():
         ],
         [
             "Tchaikovsky Symphony No. 6 ‘Pathetique’, 1st Mvt. (4분 50초부터)",
-            "https://youtu.be/oEW0cXVoGo0",
+            "https://www.youtube.com/watch?v=oEW0cXVoGo0",
             290,
         ],
         [
@@ -303,14 +302,6 @@ def get_music_list():
     ]
 
 
-def get_audio_stream_url(youtube_url):
-    """유튜브에서 실제 오디오 스트림 추출"""
-    ydl_opts = {"format": "bestaudio/best", "quiet": True}
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(youtube_url, download=False)
-        return info["url"]
-
-
 # 상태 초기화 함수
 if "quiz_pool" not in st.session_state:
     pool = get_music_list().copy()
@@ -318,7 +309,6 @@ if "quiz_pool" not in st.session_state:
     st.session_state.quiz_pool = pool
     st.session_state.current_index = 0
     st.session_state.show_answer = False
-    st.session_state.audio_url = None
 
 # --- UI 그리기 ---
 st.title("🎵 서양음악사 블라인드 청음 테스트")
@@ -333,29 +323,13 @@ if idx < len(pool):
 
     st.subheader(f"📝 문제 {idx + 1} / {len(pool)}")
 
-    # 실시간 스트리밍 URL 가져오기 (필요할 때만 실행)
-    if st.session_state.audio_url is None:
-        with st.spinner("유튜브 음원을 분석 중입니다... 잠시만 기다려주세요."):
-            try:
-                st.session_state.audio_url = get_audio_stream_url(url)
-            except Exception as e:
-                st.error(
-                    "오디오를 불러오는 데 실패했습니다. 다음 곡으로 넘어가 주세요."
-                )
-                st.session_state.audio_url = "error"
+    # 💡 [핵심 교체 포인트] st.video를 사용하여 시작 시간(start_time)을 유튜브 공식 기능으로 확실하게 제어합니다.
+    st.video(url, start_time=start_sec)
 
-    # 💡 [핵심 해결 포인트] 오디오 플레이어에 start_time 매개변수를 직접 세팅해 모바일 전 브라우저에서 확실하게 작동하도록 수정했습니다.
-    if st.session_state.audio_url and st.session_state.audio_url != "error":
-        st.audio(
-            st.session_state.audio_url,
-            format="audio/mpeg",
-            start_time=int(start_sec),
+    if start_sec > 0:
+        st.info(
+            f"💡 이 곡은 지정된 하이라이트 구간인 **{start_sec//60}분 {start_sec%60}초** 지점부터 재생됩니다."
         )
-
-        if start_sec > 0:
-            st.info(
-                f"💡 이 곡은 교수님 요청 구간인 **{start_sec//60}분 {start_sec%60}초** 지점부터 자동 재생됩니다."
-            )
 
     st.write("")
 
@@ -376,7 +350,6 @@ if idx < len(pool):
         if st.button("➡️ 다음 문제로 넘어가기", use_container_width=True):
             st.session_state.current_index += 1
             st.session_state.show_answer = False
-            st.session_state.audio_url = None
             st.rerun()
 
 else:
