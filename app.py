@@ -348,7 +348,7 @@ if idx < len(pool):
     if st.session_state.audio_url and st.session_state.audio_url != "error":
         st.audio(
             st.session_state.audio_url,
-            format="audio/mp3",
+            format="audio/mpeg",
             start_time=int(start_sec),
         )
 
